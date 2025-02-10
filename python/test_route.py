@@ -6,10 +6,11 @@ class Route :
             self.ordre = [0]
             self.ordre.extend(random.sample(range(1,NB_LIEUX), NB_LIEUX-1))
             self.ordre.append(0)
-
-        self.ordre_init = [Lieu0, Lieu1, Lieu2, Lieu3, Lieu4, Lieu5, Lieu6, Lieu7, Lieu8, Lieu9]
-        self.distance_totale = calcul_distance_route(liste_lieux)
+        else:
+            self.ordre = ordre_init[:]
         
+        self.distance_totale = calcul_distance_route(liste_lieux)
+
         
     
     def compare(self, route):
