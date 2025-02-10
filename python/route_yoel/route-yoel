@@ -2,7 +2,7 @@ from tsp_graph_init import *
 
 class Route :
     def __init__(self,ordre, distance_totale):
-        self.ordre = [lieu_0, lieu_1, lieu_2, lieu_3, lieu_4, lieu_5, lieu_6, lieu_7, lieu_8, lieu_9]
+        self.ordre = [lieu_0, lieu_1, lieu_2, lieu_3, lieu_4, lieu_5, lieu_6, lieu_7, lieu_8, lieu_9,]
         self.distance_totale = calcul_distance(lieu_0, lieu_1) + calcul_distance(lieu_1,lieu_2) + calcul_distance(lieu_2,lieu_3) + calcul_distance(lieu_3,lieu_4) + calcul_distance(lieu_4,lieu_5) + calcul_distance(lieu_5,lieu_6) + calcul_distance(lieu_6,lieu_7) + calcul_distance(lieu_7,lieu_8) + calcul_distance(lieu_8,lieu_9) + calcul_distance(lieu_9,lieu_0)
 
     def longueur(self, calcul_distance(lieu_A, lieu_B)):
