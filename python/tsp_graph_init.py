@@ -1,4 +1,4 @@
-from numpy import sqrt
+from numpy import sqrt, random
 
 class Lieu :
     def __init__(self,nom,x,y):
@@ -12,19 +12,17 @@ class Lieu :
         return distance
 
 
+LARGEUR = 800
+HAUTEUR = 600
+nb_lieux = random.randint(5, 15)
+
 class Graph:
 	liste_lieux = [
-		Lieu("Lieu1", 100, 150),
-		Lieu("Lieu2", 200, 250),
-		Lieu("Lieu3", 300, 350),
-		Lieu("Lieu4", 400, 450),
-		Lieu("Lieu5", 500, 550)
+		Lieu(f"Lieu{i+1}", random.randint(0, LARGEUR), random.randint(0, HAUTEUR))
+		for i in range(nb_lieux)
 	]
-	 
-	largeur_max = 800
-	hauteur_max = 600
-	nb_lieux = len(liste_lieux)
-	  
+	print(liste_lieux) 
+
 	def __init__(self):
 		self.calcul_matrice_cout_od()
 
@@ -38,7 +36,11 @@ class Graph:
 
 	"""def afficher_matrice_od(self):
 		for ligne in self.matrice_od:
-			print(ligne)"""
+			print(ligne)
+
+if __name__ == "__main__":
+    graph = Graph()
+    graph.afficher_matrice_od()"""
 
 
 
