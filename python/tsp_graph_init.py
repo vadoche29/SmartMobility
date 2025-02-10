@@ -1,28 +1,46 @@
-from math import sqrt
+from numpy import sqrt
 
-class Lieu:
-	def __init__(self, nom, x, y):
-		self.nom = nom
-		self.x = x
-		self.y = y
+class Lieu :
+    def __init__(self,nom,x,y):
+        self.nom=nom
+        self.x=x
+        self.y=y
 
-	def distance(self, autre_lieu):
-		return sqrt((self.x - autre_lieu.x)**2 + (self.y - autre_lieu.y)**2)
+    def calculate_distance(self,autre_lieu):
+        distance=sqrt((self.x-autre_lieu.x)**2+(self.y-autre_lieu.y)**2)
+
+        return distance
+
 
 class Graph:
-	liste_lieux = []
+	liste_lieux = [
+		Lieu("Lieu1", 100, 150),
+		Lieu("Lieu2", 200, 250),
+		Lieu("Lieu3", 300, 350),
+		Lieu("Lieu4", 400, 450),
+		Lieu("Lieu5", 500, 550)
+	]
+	 
 	largeur_max = 800
 	hauteur_max = 600
 	nb_lieux = len(liste_lieux)
+	  
+	def __init__(self):
+		self.calcul_matrice_cout_od()
 
-	def calcul_matrice_cout_od():
-		n = Graph.nb_lieux
-		Graph.matrice_od = [[0] * n for _ in range(n)]
-		for i in range(n):
-			for j in range(n):
-				if i != j:
-					x1, y1 = Graph.liste_lieux[i]
-					x2, y2 = Graph.liste_lieux[j]
-					Graph.matrice_od[i][j] = sqrt((x2 - x1)**2 + (y2 - y1)**2)
+	def calcul_matrice_cout_od(self):
+		self.matrice_od = []
+		for lieu1 in self.liste_lieux:
+			ligne = []
+			for lieu2 in self.liste_lieux:
+				ligne.append(lieu1.calculate_distance(lieu2))
+			self.matrice_od.append(ligne)
+
+	"""def afficher_matrice_od(self):
+		for ligne in self.matrice_od:
+			print(ligne)"""
 
 
+
+#class Route :
+#class Affichage :
