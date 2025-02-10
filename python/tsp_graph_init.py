@@ -20,7 +20,7 @@ class Graph:
 	liste_lieux = []
 	for i in range(nb_lieux):
 		liste_lieux.append(Lieu(f"Lieu{i}", random.randint(0, LARGEUR), random.randint(0, HAUTEUR)))
-		print(liste_lieux[i].nom, liste_lieux[i].x, liste_lieux[i].y)
+		#print(liste_lieux[i].nom, liste_lieux[i].x, liste_lieux[i].y)
 
 	def __init__(self):
 		self.calcul_matrice_cout_od()
