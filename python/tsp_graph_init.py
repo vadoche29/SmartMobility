@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import random
 import tkinter as tk
@@ -56,10 +57,11 @@ class Affichage:
         self.root = tk.Tk()
         self.root.title("TSP - Visualisation")
         self.canvas = tk.Canvas(self.root, width=LARGEUR, height=HAUTEUR, bg="white")
-        self.canvas.pack()
+        self.canvas.pack()        
+        self.lignes_route = []
         self.afficher_lieux()
-        self.afficher_route()
-        self.root.mainloop()
+        self.lignes_route = self.afficher_route()
+        self.root.update()
     
     def afficher_lieux(self):
         for i, lieu in enumerate(self.graph.liste_lieux):
@@ -71,7 +73,16 @@ class Affichage:
         for i in range(len(self.route.ordre) - 1):
             lieu1 = self.graph.liste_lieux[self.route.ordre[i]]
             lieu2 = self.graph.liste_lieux[self.route.ordre[i + 1]]
-            self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill="blue", dash=(4, 2))
+            ligne = self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill="blue", dash=(4, 2))
+            self.lignes_route.append(ligne)
+        return self.lignes_route
+            
+    def maj_route(self, route):
+        self.route = route
+        for ligne in self.lignes_route:
+            self.canvas.delete(ligne)
+        self.afficher_route()
+        self.root.update()
 
 class TSP_GA:
     def __init__(self, graph, population_size=50, generations=100, mutation_rate=0.1):
@@ -81,6 +92,7 @@ class TSP_GA:
         self.mutation_rate = mutation_rate
         self.population = [Route(graph) for _ in range(population_size)]
         self.best_route = min(self.population, key=lambda route: route.distance_totale)
+        self.affichage = Affichage(self.graph, self.best_route)
         self.evolution()
     
     def selection(self):
@@ -110,8 +122,9 @@ class TSP_GA:
             current_best = min(self.population, key=lambda route: route.distance_totale)
             if current_best.distance_totale < self.best_route.distance_totale:
                 self.best_route = current_best
+                time.sleep(1)
+                self.affichage.maj_route(self.best_route)
             print(f"Génération {generation+1}: Distance = {self.best_route.distance_totale}")
-        Affichage(self.graph, self.best_route)
 
 if __name__ == "__main__":
     graph = Graph()
