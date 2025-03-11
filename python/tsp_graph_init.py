@@ -73,9 +73,46 @@ class Affichage:
             lieu2 = self.graph.liste_lieux[self.route.ordre[i + 1]]
             self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill="blue", dash=(4, 2))
 
+class TSP_GA:
+    def __init__(self, graph, population_size=50, generations=100, mutation_rate=0.1):
+        self.graph = graph
+        self.population_size = population_size
+        self.generations = generations
+        self.mutation_rate = mutation_rate
+        self.population = [Route(graph) for _ in range(population_size)]
+        self.best_route = min(self.population, key=lambda route: route.distance_totale)
+        self.evolution()
+    
+    def selection(self):
+        self.population.sort(key=lambda route: route.distance_totale)
+        return self.population[:self.population_size // 2]
+    
+    def crossover(self, parent1, parent2):
+        cut = random.randint(1, NB_LIEUX - 1)
+        child_ordre = parent1.ordre[:cut] + [x for x in parent2.ordre if x not in parent1.ordre[:cut]]
+        return Route(self.graph, child_ordre)
+    
+    def mutation(self, route):
+        if random.random() < self.mutation_rate:
+            i, j = random.sample(range(1, NB_LIEUX), 2)
+            route.ordre[i], route.ordre[j] = route.ordre[j], route.ordre[i]
+        return route
+    
+    def evolution(self):
+        for generation in range(self.generations):
+            selected = self.selection()
+            new_population = selected[:]
+            while len(new_population) < self.population_size:
+                parent1, parent2 = random.sample(selected, 2)
+                child = self.crossover(parent1, parent2)
+                new_population.append(self.mutation(child))
+            self.population = new_population
+            current_best = min(self.population, key=lambda route: route.distance_totale)
+            if current_best.distance_totale < self.best_route.distance_totale:
+                self.best_route = current_best
+            print(f"Génération {generation+1}: Distance = {self.best_route.distance_totale}")
+        Affichage(self.graph, self.best_route)
+
 if __name__ == "__main__":
     graph = Graph()
-    route = Route(graph)
-    print("Ordre de la route:", route.ordre)
-    print("Distance totale:", route.distance_totale)
-    Affichage(graph, route)
+    tsp_ga = TSP_GA(graph)
