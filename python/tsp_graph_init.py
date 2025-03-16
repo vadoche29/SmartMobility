@@ -5,7 +5,7 @@ import tkinter as tk
 
 LARGEUR = 800
 HAUTEUR = 600
-NB_LIEUX = max(2, random.randint(5, 15))
+NB_LIEUX = 100
 
 class Lieu:
     def __init__(self, nom, x, y):
@@ -158,12 +158,17 @@ class TSP_GA:
 
     def exec(self):
         route=graph.route_plus_proche_voisin()
-        self.affichage.afficher_route(route)
-        route.ordre=list(range(NB_LIEUX))
-        self.affichage.afficher_route(route)
-        route = self.route_aleatoire()
-        self.affichage.afficher_route(route)
-        
+        generation=[route]+[self.route_aleatoire() for _ in range(self.taille_population-1)]
+        #generation=[self.route_aleatoire() for _ in range(self.taille_population)]
+        generation.sort()
+        meilleure_route=generation[0]
+        self.affichage.afficher_route(meilleure_route)
+        for i in range(self.nb_generations):
+            generation=self.nouvelle_generation(generation)
+            generation.sort()
+            if meilleure_route > generation[0]:
+                meilleure_route=generation[0]
+                self.affichage.afficher_route(meilleure_route)
         
         self.affichage.fenetre.mainloop()
 
