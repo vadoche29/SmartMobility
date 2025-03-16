@@ -90,11 +90,16 @@ class Route:
         return f"ordre : {self.ordre}, distance totale : {self.distance_totale}"
 
 RAYON=10
+MARGE_VERTICALE=15
+MARGE_HORIZONTALE=11
 class Affichage:
     def __init__(self, graph):
         self.graph = graph
         self.fenetre = tk.Tk()
-        self.canvas = tk.Canvas(self.fenetre, width=LARGEUR+2*RAYON, height=HAUTEUR+2*RAYON, bg="white")
+        self.canvas = tk.Canvas(self.fenetre, width=LARGEUR+2*MARGE_HORIZONTALE, height=HAUTEUR+2*MARGE_VERTICALE, bg="white")
+        self.canvas.configure(xscrollincrement='1', yscrollincrement='1')
+        self.canvas.xview_scroll(-MARGE_HORIZONTALE, "units")
+        self.canvas.yview_scroll(-MARGE_VERTICALE, "units")
         self.canvas.pack()
         self.afficher_graph()
         self.fenetre.update()
@@ -105,8 +110,8 @@ class Affichage:
     def afficher_graph(self):
         for lieu in self.graph.liste_lieux:
             
-            self.canvas.create_oval(RAYON+ lieu.x - RAYON,RAYON+ lieu.y - RAYON ,RAYON+ lieu.x + RAYON,RAYON+ lieu.y + RAYON, fill="red"if lieu.nom=='0' else"light grey", outline="black")
-            self.canvas.create_text(RAYON+lieu.x, RAYON+lieu.y , text=lieu.nom, fill="black")
+            self.canvas.create_oval( lieu.x - RAYON, lieu.y - RAYON , lieu.x + RAYON, lieu.y + RAYON, fill="red"if lieu.nom=='0' else"light grey", outline="black")
+            self.canvas.create_text(lieu.x, lieu.y , text=lieu.nom, fill="black")
 
     
     def afficher_route(self,route):
@@ -117,10 +122,10 @@ class Affichage:
         for i in range(len(route.ordre) - 1):
             lieu1 = self.graph.liste_lieux[route.ordre[i]]
             lieu2 = self.graph.liste_lieux[route.ordre[i + 1]]
-            ligne=self.canvas.create_line(RAYON+lieu1.x, RAYON+lieu1.y, RAYON+lieu2.x, RAYON+lieu2.y, fill="blue", dash=(4, 4))
+            ligne=self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill="blue", dash=(4, 4))
             self.canvas.tag_lower(ligne)
             self.lignes_route.append(ligne)
-            label=self.canvas.create_text(RAYON+lieu1.x, RAYON+lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"))
+            label=self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"))
             self.labels_route.append(label)
         self.canvas.create_text(LARGEUR // 2, HAUTEUR - 10, text=f"Distance totale : {route.distance_totale}", fill="black")
         self.fenetre.update()
