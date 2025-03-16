@@ -145,6 +145,7 @@ class Affichage:
 
 class TSP_GA:
     PROBA_MUTATION = 0.01
+    NB_INDIVIDUS_INTERGENERATION = 10
 
     def __init__(self, graph, taille_population=100, nb_generations=10000):
         self.graph = graph
@@ -167,8 +168,9 @@ class TSP_GA:
         self.affichage.fenetre.mainloop()
 
     def route_aleatoire(self):
-        ordre = list(range(NB_LIEUX))
+        ordre = list(range(1,NB_LIEUX))
         random.shuffle(ordre)
+        ordre=[0]+ordre+[0]
         return Route(self.graph, ordre)
 
     def croisement_mutation(self,route1,route2):
@@ -182,6 +184,19 @@ class TSP_GA:
             index1,index2=random.sample(range(1,NB_LIEUX),2)
             ordre_enfant[index1],ordre_enfant[index2]=ordre_enfant[index2],ordre_enfant[index1]
         return Route(self.graph,ordre_enfant)
+    
+    def nouvelle_generation(self,generation):
+        generation.sort()
+        nouvelle_generation=generation[:self.NB_INDIVIDUS_INTERGENERATION]
+        while len(nouvelle_generation)<len(generation):
+            parents=generation[:]
+            parent1=random.choices(parents,k=1,weights=[1/route.distance_totale for route in parents])[0]
+            parents.remove(parent1)
+            parent2=random.choices(parents,k=1,weights=[1/route.distance_totale for route in parents])[0]
+            enfant=self.croisement_mutation(parent1,parent2)
+            nouvelle_generation.append(enfant)
+        return nouvelle_generation
+
 
 
 
