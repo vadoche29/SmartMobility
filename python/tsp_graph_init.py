@@ -92,6 +92,7 @@ class Route:
 RAYON=10
 MARGE_VERTICALE=15
 MARGE_HORIZONTALE=11
+N_MEILLEURES_ROUTES=3
 class Affichage:
     def __init__(self, graph):
         self.graph = graph
@@ -106,6 +107,7 @@ class Affichage:
         self.fenetre.bind("<Escape>", self.quitter)
         self.lignes_route = []
         self.labels_route = []
+        self.routes = []
     
     def afficher_graph(self):
         for lieu in self.graph.liste_lieux:
@@ -115,19 +117,27 @@ class Affichage:
 
     
     def afficher_route(self,route):
-        for ligne in self.lignes_route:
-            self.canvas.delete(ligne)
-        for label in self.labels_route:
-            self.canvas.delete(label)
-        for i in range(len(route.ordre) - 1):
-            lieu1 = self.graph.liste_lieux[route.ordre[i]]
-            lieu2 = self.graph.liste_lieux[route.ordre[i + 1]]
-            ligne=self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill="blue", dash=(4, 4))
-            self.canvas.tag_lower(ligne)
-            self.lignes_route.append(ligne)
-            label=self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"))
-            self.labels_route.append(label)
-        self.canvas.create_text(LARGEUR // 2, HAUTEUR - 10, text=f"Distance totale : {route.distance_totale}", fill="black")
+        self.routes.append(route)
+        if len(self.routes) > N_MEILLEURES_ROUTES:
+            self.routes=self.routes[1:]
+        self.canvas.delete("route")
+        for numroute, route in enumerate(self.routes):
+            meilleure_route = bool(numroute == len(self.routes) - 1)
+            couleur_route = "blue" if meilleure_route else "grey"
+            pointille_route = (4, 4) if meilleure_route else (2, 2)
+            for i in range(len(route.ordre) - 1):
+                lieu1 = self.graph.liste_lieux[route.ordre[i]]
+                lieu2 = self.graph.liste_lieux[route.ordre[i + 1]]
+                ligne=self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill=couleur_route, dash=pointille_route, tags="route")
+                #self.canvas.tag_lower(ligne)
+                #self.lignes_route.append(ligne)
+                if meilleure_route:
+                    label=self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"),tags="route")
+                #self.labels_route.append(label)
+            if meilleure_route:
+                self.canvas.create_text(LARGEUR // 2, HAUTEUR - 10, text=f"Distance totale : {route.distance_totale}", fill="black",tags="route")
+        
+        self.canvas.tag_lower("route")
         self.fenetre.update()
 
     def quitter(self,event):
@@ -138,11 +148,28 @@ class TSP_GA:
 
     def __init__(self, graph, taille_population=100, nb_generations=10000):
         self.graph = graph
+        self.affichage=Affichage(graph)
         self.taille_population = taille_population
         self.nb_generations = nb_generations
         # self.population = [Route(self.graph) for _ in range(self.taille_population)]
         # self.meilleure_route = min(self.population)
         # self.affichage = Affichage(self.graph, self.meilleure_route)
+
+    def exec(self):
+        route=graph.route_plus_proche_voisin()
+        self.affichage.afficher_route(route)
+        route.ordre=list(range(NB_LIEUX))
+        self.affichage.afficher_route(route)
+        route = self.route_aleatoire()
+        self.affichage.afficher_route(route)
+        
+        
+        self.affichage.fenetre.mainloop()
+
+    def route_aleatoire(self):
+        ordre = list(range(NB_LIEUX))
+        random.shuffle(ordre)
+        return Route(self.graph, ordre)
 
     def croisement_mutation(self,route1,route2):
         index_cassure=random.randint(2,NB_LIEUX-1)
@@ -157,14 +184,9 @@ class TSP_GA:
         return Route(self.graph,ordre_enfant)
 
 
-graph = Graph()
-#graph1=Graph()
-#autre_route = Route(graph,[2,4,3,1,0])
-#route=Route(graph, [0, 1, 2, 3, 4])
 
-route=graph.route_plus_proche_voisin()
-af=Affichage(graph)
-af.afficher_route(route)
-route.ordre=list(range(NB_LIEUX))
-af.afficher_route(route)
-af.fenetre.mainloop()
+graph=Graph()
+algo=TSP_GA(graph)
+algo.exec()
+
+
