@@ -105,8 +105,6 @@ class Affichage:
         self.afficher_graph()
         self.fenetre.update()
         self.fenetre.bind("<Escape>", self.quitter)
-        self.lignes_route = []
-        self.labels_route = []
         self.routes = []
     
     def afficher_graph(self):
@@ -128,16 +126,15 @@ class Affichage:
             for i in range(len(route.ordre) - 1):
                 lieu1 = self.graph.liste_lieux[route.ordre[i]]
                 lieu2 = self.graph.liste_lieux[route.ordre[i + 1]]
-                ligne=self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill=couleur_route, dash=pointille_route, tags="route")
-                #self.canvas.tag_lower(ligne)
-                #self.lignes_route.append(ligne)
+                self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill=couleur_route, dash=pointille_route, tags="route")
                 if meilleure_route:
-                    label=self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"),tags="route")
-                #self.labels_route.append(label)
-            if meilleure_route:
-                self.canvas.create_text(LARGEUR // 2, HAUTEUR - 10, text=f"Distance totale : {route.distance_totale}", fill="black",tags="route")
-        
+                    self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"),tags="route")
         self.canvas.tag_lower("route")
+        self.fenetre.update()
+
+    def afficher_legende(self, legende):
+        self.canvas.delete("legende")
+        self.canvas.create_text(LARGEUR // 2, HAUTEUR +MARGE_VERTICALE- 10, text=legende, fill="black",tags="legende")
         self.fenetre.update()
 
     def quitter(self,event):
@@ -164,12 +161,14 @@ class TSP_GA:
         meilleure_route=generation[0]
         self.affichage.afficher_route(meilleure_route)
         for i in range(self.nb_generations):
+            self.affichage.afficher_legende(f"[{(100*i)//self.nb_generations}%] distance = {meilleure_route.distance_totale:.3f} {i}/{self.nb_generations} itérations")
             generation=self.nouvelle_generation(generation)
             generation.sort()
             if meilleure_route > generation[0]:
                 meilleure_route=generation[0]
                 self.affichage.afficher_route(meilleure_route)
         
+        self.affichage.afficher_legende(f"[100%] distance = {meilleure_route.distance_totale:.3f} {self.nb_generations} itérations")
         self.affichage.fenetre.mainloop()
 
     def route_aleatoire(self):
@@ -198,7 +197,9 @@ class TSP_GA:
             parent1=random.choices(parents,k=1,weights=[1/route.distance_totale for route in parents])[0]
             parents.remove(parent1)
             parent2=random.choices(parents,k=1,weights=[1/route.distance_totale for route in parents])[0]
-            enfant=self.croisement_mutation(parent1,parent2)
+            couple=[parent1,parent2]
+            random.shuffle(couple)
+            enfant=self.croisement_mutation(couple[0],couple[1])
             nouvelle_generation.append(enfant)
         return nouvelle_generation
 
