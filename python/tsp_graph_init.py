@@ -3,6 +3,8 @@ import numpy as np
 import random
 import tkinter as tk
 import csv
+from tkinter import filedialog
+from tkinter import Tk
 
 LARGEUR = 800
 HAUTEUR = 600
@@ -26,17 +28,9 @@ class Graph:
         self.read_csv()  
         self.matrice_od = self.calcul_matrice_cout_od()
 
-    # def read_csv(self):
-    #     with open("I:\Cours M2\Smart Mobility\graph_20.csv", newline='') as csvfile:
-    #         reader = csv.reader(csvfile)
-    #         next(reader)  # Ignorer l'en-tête
-    #         for i, row in enumerate(reader):
-    #             x = float(row[0])
-    #             y = float(row[1])
-    #             self.liste_lieux.append(Lieu(str(i), x, y))  # Utiliser self.liste_lieux
-
     def read_csv(self):
-        with open("I:\Cours M2\Smart Mobility\graph_20.csv", newline='') as csvfile:
+        file_path = filedialog.askopenfilename(title="Select a CSV file", filetypes=[("CSV files", "*.csv")])
+        with open(file_path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             next(reader) 
             for i, row in enumerate(reader):
@@ -193,7 +187,7 @@ class TSP_GA:
                 meilleure_route=generation[0]
                 self.affichage.afficher_route(meilleure_route)
         
-        self.affichage.afficher_legende(f"[100%] distance = {meilleure_route.distance_totale:.3f} {self.nb_generations} itérations")
+        self.affichage.afficher_legende(f"La meilleure route trouvée a une distance de {meilleure_route.distance_totale:.3f} après {self.nb_generations} itérations")
         self.affichage.fenetre.mainloop()
 
     def route_aleatoire(self):
