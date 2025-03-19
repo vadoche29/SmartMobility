@@ -2,10 +2,13 @@ import time
 import numpy as np
 import random
 import tkinter as tk
+from tkinter import filedialog
+import csv
+
 
 LARGEUR = 800
 HAUTEUR = 600
-NB_LIEUX = 100
+NB_LIEUX = 20
 
 class Lieu:
     def __init__(self, nom, x, y):
@@ -20,8 +23,9 @@ class Lieu:
         return f"({self.x}, {self.y}, {self.nom})"
 
 class Graph:
-    def __init__(self):  
-        self.liste_lieux = [Lieu(f"{i}", random.randint(0, LARGEUR), random.randint(0, HAUTEUR)) for i in range(NB_LIEUX)]
+    def __init__(self):
+        self.liste_lieux = []  
+        self.read_csv() 
         self.matrice_od = self.calcul_matrice_cout_od()
 
     def __repr__(self):
@@ -38,11 +42,13 @@ class Graph:
         distances = [self.matrice_od[voisin][lieu]for voisin in voisins]
         return voisins[np.argmin(distances)]
     
-    def route_plus_proche_voisin(self) -> "Route": 
-        lieu_depart=0
+    def route_plus_proche_voisin(self,lieu_depart=0) -> "Route": 
         lieu_actuel=lieu_depart
         ordre=[lieu_depart]
-        lieux_restants=list(range(1,NB_LIEUX))
+        lieux_restants=list(range(NB_LIEUX))
+        #print(lieux_restants, lieu_depart)
+        lieux_restants.remove(lieu_depart)
+
         while lieux_restants:
             lieu_suivant=self.plus_proche_voisin(lieu_actuel,lieux_restants)
             ordre.append(lieu_suivant)
@@ -55,6 +61,17 @@ class Graph:
         ordre_decale=ordre[1:]+[ordre[0]]
         return sum(self.matrice_od[lieu1][lieu2] for lieu1, lieu2 in zip(ordre, ordre_decale))
 
+    def read_csv(self):
+        file_path = f"/home/vmarch25/Documents/graph_{NB_LIEUX}.csv"
+        with open(file_path, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader) 
+            for i, row in enumerate(reader):
+                print(f"Ligne {i} : {row}")  # Debug
+                x = float(row[0])
+                y = float(row[1])
+                lieu = Lieu(str(i), x, y)
+                self.liste_lieux.append(lieu)
 
 class Route:
     def __init__(self, graph, ordre_init):
@@ -106,6 +123,7 @@ class Affichage:
         self.fenetre.update()
         self.fenetre.bind("<Escape>", self.quitter)
         self.routes = []
+        
     
     def afficher_graph(self):
         for lieu in self.graph.liste_lieux:
@@ -131,6 +149,7 @@ class Affichage:
                     self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"),tags="route")
         self.canvas.tag_lower("route")
         self.fenetre.update()
+        #self.fenetre.mainloop()
 
     def afficher_legende(self, legende):
         self.canvas.delete("legende")
@@ -140,37 +159,61 @@ class Affichage:
     def quitter(self,event):
         self.fenetre.destroy()
 
-class TSP_GA:
-    PROBA_MUTATION = 0.01
-    NB_INDIVIDUS_INTERGENERATION = 10
 
-    def __init__(self, graph, taille_population=100, nb_generations=10000):
+class TSP_GA:
+    PROBA_MUTATION = 0.1
+    NB_INDIVIDUS_INTERGENERATION = 20
+
+    def __init__(self, graph, taille_population=500, nb_generations=10000):
         self.graph = graph
         self.affichage=Affichage(graph)
         self.taille_population = taille_population
         self.nb_generations = nb_generations
-        # self.population = [Route(self.graph) for _ in range(self.taille_population)]
-        # self.meilleure_route = min(self.population)
-        # self.affichage = Affichage(self.graph, self.meilleure_route)
 
     def exec(self):
-        route=graph.route_plus_proche_voisin()
-        generation=[route]+[self.route_aleatoire() for _ in range(self.taille_population-1)]
-        #generation=[self.route_aleatoire() for _ in range(self.taille_population)]
+        generation = self.generation_initiale()
+        
         generation.sort()
         meilleure_route=generation[0]
         self.affichage.afficher_route(meilleure_route)
         for i in range(self.nb_generations):
+            print(i)
             self.affichage.afficher_legende(f"[{(100*i)//self.nb_generations}%] distance = {meilleure_route.distance_totale:.3f} {i}/{self.nb_generations} itérations")
             generation=self.nouvelle_generation(generation)
             generation.sort()
             if meilleure_route > generation[0]:
                 meilleure_route=generation[0]
                 self.affichage.afficher_route(meilleure_route)
-        
         self.affichage.afficher_legende(f"[100%] distance = {meilleure_route.distance_totale:.3f} {self.nb_generations} itérations")
         self.affichage.fenetre.mainloop()
 
+    def formater_route(self,ordre):
+        index_zero = ordre.index(0)
+        return ordre[index_zero:]+ordre[1:index_zero+1]
+    
+    def generation_initiale(self):
+        generation=[]
+        while len(generation)<NB_LIEUX:
+            if len(generation)==self.taille_population :
+                break   
+            generation=[graph.route_plus_proche_voisin(i) for i in range(NB_LIEUX)]
+        
+        for individu in generation:
+            individu.ordre = self.formater_route(individu.ordre)
+        
+        generation.sort()
+        while len(generation)<self.taille_population:
+            parents=generation[:]
+            parent1=random.choices(parents,k=1,weights=[(1/route.distance_totale)**2 for route in parents])[0]
+            parents.remove(parent1)
+            parent2=random.choices(parents,k=1,weights=[(1/route.distance_totale)**2 for route in parents])[0]
+            couple=[parent1,parent2]
+            random.shuffle(couple)
+            enfant=self.croisement_mutation(couple[0],couple[1])
+            generation.append(enfant)  
+
+        return generation
+            
     def route_aleatoire(self):
         ordre = list(range(1,NB_LIEUX))
         random.shuffle(ordre)
@@ -194,9 +237,9 @@ class TSP_GA:
         nouvelle_generation=generation[:self.NB_INDIVIDUS_INTERGENERATION]
         while len(nouvelle_generation)<len(generation):
             parents=generation[:]
-            parent1=random.choices(parents,k=1,weights=[1/route.distance_totale for route in parents])[0]
+            parent1=random.choices(parents,k=1,weights=[(1/route.distance_totale)**2 for route in parents])[0]
             parents.remove(parent1)
-            parent2=random.choices(parents,k=1,weights=[1/route.distance_totale for route in parents])[0]
+            parent2=random.choices(parents,k=1,weights=[(1/route.distance_totale)**2 for route in parents])[0]
             couple=[parent1,parent2]
             random.shuffle(couple)
             enfant=self.croisement_mutation(couple[0],couple[1])
