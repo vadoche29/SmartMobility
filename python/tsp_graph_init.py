@@ -8,7 +8,7 @@ from tkinter import Tk
 
 LARGEUR = 800
 HAUTEUR = 600
-NB_LIEUX = 0
+NB_LIEUX = 20
 
 class Lieu:
     def __init__(self, nom, x, y):
@@ -29,7 +29,7 @@ class Graph:
         self.matrice_od = self.calcul_matrice_cout_od()
 
     def read_csv(self):
-        file_path = filedialog.askopenfilename(title="Select a CSV file", filetypes=[("CSV files", "*.csv")])
+        file_path = f"I:\\Cours M2\\Smart Mobility\\graph_{NB_LIEUX}.csv"
         with open(file_path, newline='') as csvfile:
             reader = csv.reader(csvfile)
             next(reader) 
