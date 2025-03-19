@@ -123,20 +123,18 @@ class Affichage:
         self.canvas.pack()
         self.afficher_graph()
         self.fenetre.update()
-        self.fenetre.bind("<Escape>", self.quitter)
+        self.fenetre.bind("<Escape>", self.quitter)  # Bind Escape key to close the window
         self.routes = []
     
     def afficher_graph(self):
         for lieu in self.graph.liste_lieux:
-            
-            self.canvas.create_oval( lieu.x - RAYON, lieu.y - RAYON , lieu.x + RAYON, lieu.y + RAYON, fill="red"if lieu.nom=='0' else"light grey", outline="black")
-            self.canvas.create_text(lieu.x, lieu.y , text=lieu.nom, fill="black")
-
+            self.canvas.create_oval(lieu.x - RAYON, lieu.y - RAYON, lieu.x + RAYON, lieu.y + RAYON, fill="red" if lieu.nom == '0' else "light grey", outline="black")
+            self.canvas.create_text(lieu.x, lieu.y, text=lieu.nom, fill="black")
     
-    def afficher_route(self,route):
+    def afficher_route(self, route):
         self.routes.append(route)
         if len(self.routes) > N_MEILLEURES_ROUTES:
-            self.routes=self.routes[1:]
+            self.routes = self.routes[1:]
         self.canvas.delete("route")
         for numroute, route in enumerate(self.routes):
             meilleure_route = bool(numroute == len(self.routes) - 1)
@@ -147,16 +145,16 @@ class Affichage:
                 lieu2 = self.graph.liste_lieux[route.ordre[i + 1]]
                 self.canvas.create_line(lieu1.x, lieu1.y, lieu2.x, lieu2.y, fill=couleur_route, dash=pointille_route, tags="route")
                 if meilleure_route:
-                    self.canvas.create_text(lieu1.x, lieu1.y - RAYON -7, text=str(i), font=("Arial", 10, "bold"),tags="route")
+                    self.canvas.create_text(lieu1.x, lieu1.y - RAYON - 7, text=str(i), font=("Arial", 10, "bold"), tags="route")
         self.canvas.tag_lower("route")
         self.fenetre.update()
 
     def afficher_legende(self, legende):
         self.canvas.delete("legende")
-        self.canvas.create_text(LARGEUR // 2, HAUTEUR +MARGE_VERTICALE- 10, text=legende, fill="black",tags="legende")
+        self.canvas.create_text(LARGEUR // 2, HAUTEUR + MARGE_VERTICALE - 10, text=legende, fill="black", tags="legende")
         self.fenetre.update()
 
-    def quitter(self,event):
+    def quitter(self, event=None):
         self.fenetre.destroy()
 
 class TSP_GA:
