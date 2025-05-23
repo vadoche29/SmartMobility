@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Positionnement des micros</title>
+</head>
+<body>
+    <h1>Choisissez votre mode de saisie</h1>
+    <form action="{{ url_for('manuel') }}" method="get">
+        <button type="submit">Entrée manuelle</button>
+    </form>
+    <form action="{{ url_for('csv_upload') }}" method="get">
+        <button type="submit">Télécharger un fichier CSV</button>
+    </form>
+</body>
+</html>

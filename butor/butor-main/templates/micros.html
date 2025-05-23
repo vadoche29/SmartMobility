@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des micros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h1> Gestion des micros</h1>
+
+    <a>Comment souhaitez-vous ajouter un micro ?</a>
+    <div class="mb-4">
+        <a href="{{ url_for('manuel') }}" class="btn btn-primary"> Ajouter manuellement</a>
+        <a href="{{ url_for('csv_upload') }}" class="btn btn-secondary"> Importer depuis un CSV</a>
+    </div>
+
+    <h4>Micros enregistrés :</h4>
+    <ul class="list-group">
+        {% for micro in micros %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ micro.nom }} — Lat: {{ micro.latitude }}, Lon: {{ micro.longitude }}
+            <form method="POST" action="{{ url_for('delete_micro', index=loop.index0) }}">
+                <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+            </form>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">Aucun micro enregistré.</li>
+        {% endfor %}
+    </ul>
+    <div class="mt-3">
+        <a href="{{ url_for('visualisation') }}" class="btn btn-secondary">Retour à la carte</a>
+    </div>
+</div>
+</body>
+</html>
